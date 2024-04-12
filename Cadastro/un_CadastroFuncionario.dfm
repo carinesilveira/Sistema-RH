@@ -11,6 +11,7 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
   Font.Name = 'Segoe UI'
   Font.Style = []
   Position = poMainFormCenter
+  OnClose = FormClose
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 15

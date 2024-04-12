@@ -41,6 +41,7 @@ type
     procedure btnSalvarClick(Sender: TObject);
     procedure btnCancelarClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
   public
@@ -123,13 +124,20 @@ begin
   end;
 
   Close;
- ds_Cadastro.DataSet.Open();
+  ds_Cadastro.DataSet.Open();
+end;
+
+procedure TFrmCadastroFuncionario.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+if ds_Cadastro.DataSet.State in [dsInsert, dsEdit] then
+  ds_Cadastro.DataSet.Cancel;
 end;
 
 procedure TFrmCadastroFuncionario.FormShow(Sender: TObject);
 begin
   q_Cadastro.Open();
-  q_cadastro.Insert;
+  //q_cadastro.Insert;
 end;
 
 end.

@@ -7,7 +7,8 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Data.DB,
   Vcl.Grids, Vcl.DBGrids, FireDAC.Stan.Intf, FireDAC.Stan.Option,
   FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
-  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet, un_CadastroFuncionario,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet,
+  un_CadastroFuncionario,
   FireDAC.Comp.Client;
 
 type
@@ -18,22 +19,17 @@ type
     btnNovo: TButton;
     btnEditar: TButton;
     btnExcluir: TButton;
-    DBGrid1: TDBGrid;
-    ds_Consulta: TDataSource;
-    q_Cadastro: TFDQuery;
-    q_CadastroID_FUNC: TFDAutoIncField;
-    q_CadastroNOME: TStringField;
-    q_CadastroENDERECO: TStringField;
-    q_CadastroADMISSAO: TSQLTimeStampField;
-    q_CadastroSALARIO: TBCDField;
-    q_CadastroCARGO: TStringField;
+    gridItens: TDBGrid;
     Panel1: TPanel;
     Label1: TLabel;
     ComboBox1: TComboBox;
     Edit1: TEdit;
     Button1: TButton;
+    DataSource1: TDataSource;
     procedure btnNovoClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure btnEditarClick(Sender: TObject);
+    procedure btnExcluirClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -47,10 +43,54 @@ implementation
 
 {$R *.dfm}
 
+procedure TFrmConsultaFuncionario.btnEditarClick(Sender: TObject);
+begin
+  if FrmCadastroFuncionario.ds_Cadastro.DataSet.IsEmpty then
+  begin
+    Application.MessageBox('Nenhum registro para editar!', 'Atenção!', MB_ICONWARNING);
+    Exit;
+  end;
+
+  try
+    with TFrmCadastroFuncionario.Create(Self) do
+    try
+      ds_Cadastro.DataSet.Open;
+      ds_Cadastro.DataSet.Edit;
+      ShowModal;
+    finally
+      Free;
+    end;
+  except
+    on E: Exception do
+      MessageBox(0, PChar('Erro ao editar registro: ' + E.Message), 'Erro', MB_ICONERROR);
+  end;
+end;
+
+
+procedure TFrmConsultaFuncionario.btnExcluirClick(Sender: TObject);
+begin
+  if(FrmCadastroFuncionario.ds_Cadastro.DataSet.IsEmpty) then
+  begin
+    MessageBox(0, PChar('Não há registros para excluir '), 'Aviso!', MB_ICONWARNING);
+    Exit;
+  end;
+
+  if Application.MessageBox('Deseja realmente excluir Registro?', 'Atenção!'
+  , MB_ICONWARNING + MB_YESNO) = mrYes then
+  try
+    FrmCadastroFuncionario.ds_Cadastro.DataSet.Delete;
+  except
+    on E: Exception do
+      MessageBox(0, PChar('Não é possível deletar Registro.'), 'Erro', MB_ICONERROR);
+  end;
+end;
+
 procedure TFrmConsultaFuncionario.btnNovoClick(Sender: TObject);
 begin
    with TFrmCadastroFuncionario.Create(Self) do
   try
+    ds_Cadastro.DataSet.Open;
+    ds_Cadastro.DataSet.Insert;
     ShowModal;
   finally
     Free;
@@ -59,7 +99,7 @@ end;
 
 procedure TFrmConsultaFuncionario.FormShow(Sender: TObject);
 begin
-    FrmCadastroFuncionario.q_Cadastro.Open();
+  FrmCadastroFuncionario.q_Cadastro.Open();
 end;
 
 end.

@@ -48,10 +48,15 @@ end;
 
 procedure TFrmPrincipal.mnFuncionarioclick(Sender: TObject);
 begin
-  FrmCadastroFuncionario.q_Cadastro.Open();
-  FrmCadastroFuncionario.q_cadastro.Insert;
+ with TFrmCadastroFuncionario.Create(Self) do
+  try
+    ds_Cadastro.DataSet.Open;
+    ds_Cadastro.DataSet.Insert;
+    ShowModal;
+  finally
+    Free;
+  end;
 
-  criarTelas(TFrmCadastroFuncionario);
 end;
 
 procedure TFrmPrincipal.FormShow(Sender: TObject);
