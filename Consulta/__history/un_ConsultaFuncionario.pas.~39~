@@ -47,7 +47,7 @@ implementation
 
 procedure TFrmConsultaFuncionario.btnEditarClick(Sender: TObject);
 begin
-  if DS_CADASTRO.DataSet.IsEmpty then
+  if DataSource1.DataSet.IsEmpty then
   begin
     Application.MessageBox('Nenhum registro para editar!', 'Atenção!', MB_ICONWARNING);
     Exit;
@@ -70,7 +70,7 @@ end;
 
 procedure TFrmConsultaFuncionario.btnExcluirClick(Sender: TObject);
 begin
-  if(DS_CADASTRO.DataSet.IsEmpty) then
+  if(DataSource1.DataSet.IsEmpty) then
   begin
     MessageBox(0, PChar('Não há registros para excluir '), 'Aviso!', MB_ICONWARNING);
     Exit;
@@ -100,14 +100,14 @@ end;
 
 procedure TFrmConsultaFuncionario.btnPesquisarClick(Sender: TObject);
 begin
-   if (DS_CADASTRO.State in [dsEdit, dsInsert]) then
+   if (DataSource1.State in [dsEdit, dsInsert]) then
   begin
     Application.MessageBox('Não é possível realizar consultas no modo de Inserção ou Edição!', 'Atenção!', MB_ICONEXCLAMATION);
     Exit;
   end;
 
   try
-    DS_CADASTRO.DataSet.Close;
+    DataSource1.DataSet.Close;
     FrmCadastroFuncionario.Q_CADASTRO.Params.Clear;
     FrmCadastroFuncionario.Q_CADASTRO.SQL.Clear;
     FrmCadastroFuncionario.Q_CADASTRO.SQL.Add('SELECT * FROM FUNCIONARIOS');
@@ -126,9 +126,9 @@ begin
         end;
     end;
 
-    DS_CADASTRO.DataSet.Open;
+    DataSource1.DataSet.Open;
 
-    if DS_CADASTRO.DataSet.IsEmpty then
+    if DataSource1.DataSet.IsEmpty then
       Application.MessageBox('Nenhum registro encontrado!', 'Atenção!', MB_ICONEXCLAMATION);
 
   except
@@ -139,7 +139,7 @@ end;
 
 procedure TFrmConsultaFuncionario.FormShow(Sender: TObject);
 begin
-  DS_CADASTRO.DataSet.Open;
+  DataSource1.DataSet.Open;
 end;
 
 end.

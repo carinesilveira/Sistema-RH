@@ -11,6 +11,8 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
   Font.Name = 'Segoe UI'
   Font.Style = []
   Position = poMainFormCenter
+  OnClose = FormClose
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 15
   object pnlFundo: TPanel
@@ -71,6 +73,9 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
       Top = 181
       Width = 521
       Height = 23
+      CharCase = ecUpperCase
+      DataField = 'ENDERECO'
+      DataSource = ds_Cadastro
       TabOrder = 2
     end
     object edtNome: TDBEdit
@@ -78,6 +83,9 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
       Top = 101
       Width = 521
       Height = 23
+      CharCase = ecUpperCase
+      DataField = 'NOME'
+      DataSource = ds_Cadastro
       TabOrder = 1
     end
     object pnlAdmissao: TPanel
@@ -141,6 +149,15 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
         Top = 38
         Width = 145
         Height = 23
+        CharCase = ecUpperCase
+        DataField = 'CARGO'
+        DataSource = ds_Cadastro
+        Items.Strings = (
+          'DESENVOLVEDOR'
+          'QA'
+          'COMERCIAL'
+          'SUPORTE'
+          'MARKETING')
         TabOrder = 1
       end
       object edtSalario: TDBEdit
@@ -148,6 +165,8 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
         Top = 129
         Width = 145
         Height = 23
+        DataField = 'SALARIO'
+        DataSource = ds_Cadastro
         TabOrder = 2
       end
       object btnCancelar: TButton

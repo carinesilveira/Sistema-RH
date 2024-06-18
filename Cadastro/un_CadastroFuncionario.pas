@@ -30,20 +30,23 @@ type
     btnCancelar: TButton;
     btnSalvar: TButton;
     Conexao: TFDConnection;
-    q_Cadastro: TFDQuery;
-    ds_Cadastro: TDataSource;
-    q_CadastroID_FUNC: TFDAutoIncField;
-    q_CadastroNOME: TStringField;
-    q_CadastroENDERECO: TStringField;
-    q_CadastroADMISSAO: TSQLTimeStampField;
-    q_CadastroSALARIO: TBCDField;
-    q_CadastroCARGO: TStringField;
+    Q_CADASTRO: TFDQuery;
+    DS_CADASTRO: TDataSource;
+    Q_CADASTROID_FUNC: TFDAutoIncField;
+    Q_CADASTRONOME: TStringField;
+    Q_CADASTROENDERECO: TStringField;
+    Q_CADASTROADMISSAO: TSQLTimeStampField;
+    Q_CADASTROSALARIO: TBCDField;
+    Q_CADASTROCARGO: TIntegerField;
+    Q_CARGO: TFDQuery;
+    DS_CARGO: TDataSource;
     procedure btnSalvarClick(Sender: TObject);
     procedure btnCancelarClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
+    procedure ValidaCampos;
   public
     { Public declarations }
   end;
@@ -66,6 +69,39 @@ begin
 end;
 
 procedure TFrmCadastroFuncionario.btnSalvarClick(Sender: TObject);
+begin
+  ValidaCampos;
+
+  ds_Cadastro.DataSet.FieldByName('ADMISSAO').AsDateTime := ADMISSAO.Date;
+
+  try
+    ds_Cadastro.DataSet.Post;
+    Application.MessageBox('Registro salvo com sucesso!',
+   'Sucesso!', MB_ICONINFORMATION);
+  Except
+    on E: Exception do
+      ShowMessage('Erro: '+E.Message)
+  end;
+
+  Close;
+  ds_Cadastro.DataSet.Open();
+end;
+
+procedure TFrmCadastroFuncionario.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+if ds_Cadastro.DataSet.State in [dsInsert, dsEdit] then
+  ds_Cadastro.DataSet.Cancel;
+end;
+
+procedure TFrmCadastroFuncionario.FormShow(Sender: TObject);
+begin
+  Q_CADASTRO.Open;
+  //q_cadastro.Insert;
+  Q_CARGO.Open;
+end;
+
+procedure TFrmCadastroFuncionario.ValidaCampos;
 var
   acao : string;
 begin
@@ -111,33 +147,6 @@ begin
   else if Application.MessageBox(pchar('Cofirma a '+ acao +' dos dados?'),
    'Atenção', MB_ICONWARNING + MB_YESNO) = mrNo then
     Exit;
-
-  ds_Cadastro.DataSet.FieldByName('ADMISSAO').AsDateTime := ADMISSAO.Date;
-
-  try
-    ds_Cadastro.DataSet.Post;
-    Application.MessageBox('Registro salvo com sucesso!',
-   'Sucesso!', MB_ICONINFORMATION);
-  Except
-    on E: Exception do
-      ShowMessage('Erro: '+E.Message)
-  end;
-
-  Close;
-  ds_Cadastro.DataSet.Open();
-end;
-
-procedure TFrmCadastroFuncionario.FormClose(Sender: TObject;
-  var Action: TCloseAction);
-begin
-if ds_Cadastro.DataSet.State in [dsInsert, dsEdit] then
-  ds_Cadastro.DataSet.Cancel;
-end;
-
-procedure TFrmCadastroFuncionario.FormShow(Sender: TObject);
-begin
-  q_Cadastro.Open();
-  //q_cadastro.Insert;
 end;
 
 end.

@@ -75,7 +75,7 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
       Height = 23
       CharCase = ecUpperCase
       DataField = 'ENDERECO'
-      DataSource = ds_Cadastro
+      DataSource = DS_CADASTRO
       TabOrder = 2
     end
     object edtNome: TDBEdit
@@ -85,7 +85,7 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
       Height = 23
       CharCase = ecUpperCase
       DataField = 'NOME'
-      DataSource = ds_Cadastro
+      DataSource = DS_CADASTRO
       TabOrder = 1
     end
     object pnlAdmissao: TPanel
@@ -150,8 +150,8 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
         Width = 145
         Height = 23
         CharCase = ecUpperCase
-        DataField = 'CARGO'
-        DataSource = ds_Cadastro
+        DataField = 'CAR_NOME'
+        DataSource = DS_CARGO
         Items.Strings = (
           'DESENVOLVEDOR'
           'QA'
@@ -166,7 +166,7 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
         Width = 145
         Height = 23
         DataField = 'SALARIO'
-        DataSource = ds_Cadastro
+        DataSource = DS_CADASTRO
         TabOrder = 2
       end
       object btnCancelar: TButton
@@ -200,50 +200,61 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
     Left = 225
     Top = 384
   end
-  object q_Cadastro: TFDQuery
+  object Q_CADASTRO: TFDQuery
     Connection = Conexao
     SQL.Strings = (
       'SELECT * FROM FUNCIONARIOS')
     Left = 297
     Top = 384
-    object q_CadastroID_FUNC: TFDAutoIncField
+    object Q_CADASTROID_FUNC: TFDAutoIncField
       FieldName = 'ID_FUNC'
       Origin = 'ID_FUNC'
       ProviderFlags = [pfInWhere, pfInKey]
       ReadOnly = True
     end
-    object q_CadastroNOME: TStringField
+    object Q_CADASTRONOME: TStringField
       FieldName = 'NOME'
       Origin = 'NOME'
       Required = True
       Size = 50
     end
-    object q_CadastroENDERECO: TStringField
+    object Q_CADASTROENDERECO: TStringField
       FieldName = 'ENDERECO'
       Origin = 'ENDERECO'
       Size = 50
     end
-    object q_CadastroADMISSAO: TSQLTimeStampField
+    object Q_CADASTROADMISSAO: TSQLTimeStampField
       FieldName = 'ADMISSAO'
       Origin = 'ADMISSAO'
       Required = True
     end
-    object q_CadastroSALARIO: TBCDField
+    object Q_CADASTROSALARIO: TBCDField
       FieldName = 'SALARIO'
       Origin = 'SALARIO'
       Required = True
       Precision = 14
       Size = 2
     end
-    object q_CadastroCARGO: TStringField
+    object Q_CADASTROCARGO: TIntegerField
       FieldName = 'CARGO'
       Origin = 'CARGO'
-      Required = True
     end
   end
-  object ds_Cadastro: TDataSource
-    DataSet = q_Cadastro
+  object DS_CADASTRO: TDataSource
+    DataSet = Q_CADASTRO
     Left = 369
     Top = 384
+  end
+  object Q_CARGO: TFDQuery
+    Connection = Conexao
+    SQL.Strings = (
+      'SELECT * FROM CARGOS')
+    Left = 440
+    Top = 40
+  end
+  object DS_CARGO: TDataSource
+    DataSet = Q_CARGO
+    Left = 504
+    Top = 40
   end
 end

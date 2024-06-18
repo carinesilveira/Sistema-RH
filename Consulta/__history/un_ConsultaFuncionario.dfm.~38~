@@ -76,18 +76,29 @@ object FrmConsultaFuncionario: TFrmConsultaFuncionario
         OnClick = btnExcluirClick
       end
     end
-    object DBGrid1: TDBGrid
+    object gridItens: TDBGrid
       Left = 7
       Top = 159
       Width = 617
       Height = 250
       DataSource = DataSource1
+      DragCursor = crHandPoint
+      DrawingStyle = gdsGradient
+      GradientEndColor = 10526800
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit, dgTitleClick, dgTitleHotTrack]
+      ParentFont = False
       TabOrder = 2
-      TitleFont.Charset = DEFAULT_CHARSET
-      TitleFont.Color = clWindowText
+      TitleFont.Charset = EASTEUROPE_CHARSET
+      TitleFont.Color = 8421440
       TitleFont.Height = -12
       TitleFont.Name = 'Segoe UI'
-      TitleFont.Style = []
+      TitleFont.Style = [fsBold]
+      OnDblClick = btnEditarClick
       Columns = <
         item
           Expanded = False
@@ -116,6 +127,7 @@ object FrmConsultaFuncionario: TFrmConsultaFuncionario
         item
           Expanded = False
           FieldName = 'ADMISSAO'
+          Width = 90
           Visible = True
         end>
     end
@@ -140,35 +152,41 @@ object FrmConsultaFuncionario: TFrmConsultaFuncionario
         Font.Style = []
         ParentFont = False
       end
-      object ComboBox1: TComboBox
+      object CBCAMPOS: TComboBox
         Left = 0
         Top = 20
         Width = 145
         Height = 23
+        CharCase = ecUpperCase
+        ItemIndex = 0
         TabOrder = 0
-        Text = 'ComboBox1'
+        Text = 'NOME'
+        Items.Strings = (
+          'NOME'
+          'CARGO')
       end
-      object Edit1: TEdit
+      object edt_pesquisa: TEdit
         Left = 168
         Top = 20
         Width = 209
         Height = 23
+        CharCase = ecUpperCase
         TabOrder = 1
-        Text = 'Edit1'
       end
-      object Button1: TButton
+      object btnPesquisar: TButton
         Left = 528
         Top = 18
         Width = 75
         Height = 25
         Caption = 'Pesquisar'
         TabOrder = 2
+        OnClick = btnPesquisarClick
       end
     end
   end
   object DataSource1: TDataSource
-    DataSet = FrmCadastroFuncionario.q_Cadastro
-    Left = 456
-    Top = 216
+    DataSet = FrmCadastroFuncionario.Q_CADASTRO
+    Left = 568
+    Top = 344
   end
 end

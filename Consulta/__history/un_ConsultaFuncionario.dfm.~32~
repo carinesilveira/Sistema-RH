@@ -171,7 +171,6 @@ object FrmConsultaFuncionario: TFrmConsultaFuncionario
         Height = 23
         CharCase = ecUpperCase
         TabOrder = 1
-        Text = 'EDIT1'
       end
       object Button1: TButton
         Left = 528
@@ -184,8 +183,8 @@ object FrmConsultaFuncionario: TFrmConsultaFuncionario
     end
   end
   object DataSource1: TDataSource
-    DataSet = FrmCadastroFuncionario.q_Cadastro
-    Left = 456
-    Top = 216
+    DataSet = FrmCadastroFuncionario.Q_CADASTRO
+    Left = 568
+    Top = 344
   end
 end

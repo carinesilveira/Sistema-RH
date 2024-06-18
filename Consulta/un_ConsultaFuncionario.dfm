@@ -81,7 +81,7 @@ object FrmConsultaFuncionario: TFrmConsultaFuncionario
       Top = 159
       Width = 617
       Height = 250
-      DataSource = DataSource1
+      DataSource = DS_CADASTRO
       DragCursor = crHandPoint
       DrawingStyle = gdsGradient
       GradientEndColor = 10526800
@@ -127,6 +127,7 @@ object FrmConsultaFuncionario: TFrmConsultaFuncionario
         item
           Expanded = False
           FieldName = 'ADMISSAO'
+          Width = 90
           Visible = True
         end>
     end
@@ -151,7 +152,7 @@ object FrmConsultaFuncionario: TFrmConsultaFuncionario
         Font.Style = []
         ParentFont = False
       end
-      object ComboBox1: TComboBox
+      object CBCAMPOS: TComboBox
         Left = 0
         Top = 20
         Width = 145
@@ -164,28 +165,33 @@ object FrmConsultaFuncionario: TFrmConsultaFuncionario
           'NOME'
           'CARGO')
       end
-      object Edit1: TEdit
+      object edt_pesquisa: TEdit
         Left = 168
         Top = 20
         Width = 209
         Height = 23
         CharCase = ecUpperCase
         TabOrder = 1
-        Text = 'EDIT1'
       end
-      object Button1: TButton
+      object btnPesquisar: TButton
         Left = 528
         Top = 18
         Width = 75
         Height = 25
         Caption = 'Pesquisar'
         TabOrder = 2
+        OnClick = btnPesquisarClick
       end
     end
   end
-  object DataSource1: TDataSource
-    DataSet = FrmCadastroFuncionario.q_Cadastro
+  object DS_CADASTRO: TDataSource
+    DataSet = FrmCadastroFuncionario.Q_CADASTRO
     Left = 568
+    Top = 344
+  end
+  object DS_CARGO: TDataSource
+    DataSet = FrmCadastroFuncionario.Q_CARGO
+    Left = 472
     Top = 344
   end
 end
