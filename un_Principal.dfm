@@ -1317,6 +1317,7 @@ object FrmPrincipal: TFrmPrincipal
       Caption = 'Resumo'
       object Resumo2: TMenuItem
         Caption = 'Resumo'
+        OnClick = Resumo2Click
       end
     end
     object Sair1: TMenuItem

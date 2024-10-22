@@ -4,7 +4,8 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Menus, Vcl.Imaging.pngimage, un_CadastroFuncionario, un_ConsultaFuncionario,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Menus, Vcl.Imaging.pngimage, un_CadastroFuncionario,
+  un_ConsultaFuncionario, un_Resumo,
   Vcl.ExtCtrls;
 
 type
@@ -22,6 +23,7 @@ type
     procedure mnFuncionarioclick(Sender: TObject);
     procedure Funcionrio2Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure Resumo2Click(Sender: TObject);
   private
     { Private declarations }
       procedure criarTelas(aTela: TformClass);
@@ -57,6 +59,11 @@ begin
     Free;
   end;
 
+end;
+
+procedure TFrmPrincipal.Resumo2Click(Sender: TObject);
+begin
+  criarTelas(TFrmResumo);
 end;
 
 procedure TFrmPrincipal.FormShow(Sender: TObject);

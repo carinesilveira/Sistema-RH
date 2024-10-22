@@ -33,6 +33,7 @@ type
     procedure btnExcluirClick(Sender: TObject);
     procedure btnPesquisarClick(Sender: TObject);
   private
+    procedure AtualizarDados;
     { Private declarations }
   public
     { Public declarations }
@@ -45,6 +46,12 @@ implementation
 
 {$R *.dfm}
 
+procedure TFrmConsultaFuncionario.AtualizarDados;
+begin
+  DS_CADASTRO.DataSet.Close;
+  DS_CADASTRO.DataSet.Open;
+end;
+
 procedure TFrmConsultaFuncionario.btnEditarClick(Sender: TObject);
 begin
   if DS_CADASTRO.DataSet.IsEmpty then
@@ -54,13 +61,18 @@ begin
   end;
 
   try
-    with TFrmCadastroFuncionario.Create(Self) do
+    FrmCadastroFuncionario := TFrmCadastroFuncionario.Create(Self);
     try
-      ds_Cadastro.DataSet.Open;
-      ds_Cadastro.DataSet.Edit;
-      ShowModal;
+      if not DS_CADASTRO.DataSet.Active then
+        DS_CADASTRO.DataSet.Open;
+
+//      FrmCadastroFuncionario.ds_Cadastro.DataSet := DS_CADASTRO.DataSet;
+
+
+      FrmCadastroFuncionario.ShowModal;
+      DS_CADASTRO.DataSet.Edit;
     finally
-      Free;
+      FrmCadastroFuncionario.Free;
     end;
   except
     on E: Exception do
@@ -68,39 +80,59 @@ begin
   end;
 end;
 
+
+
 procedure TFrmConsultaFuncionario.btnExcluirClick(Sender: TObject);
 begin
-  if(DS_CADASTRO.DataSet.IsEmpty) then
+  if DS_CADASTRO.DataSet.IsEmpty then
   begin
-    MessageBox(0, PChar('Não há registros para excluir '), 'Aviso!', MB_ICONWARNING);
+    MessageBox(0, PChar('Não há registros para excluir!'), 'Aviso!', MB_ICONWARNING);
     Exit;
   end;
 
-  if Application.MessageBox('Deseja realmente excluir Registro?', 'Atenção!'
-  , MB_ICONWARNING + MB_YESNO) = mrYes then
+  if Application.MessageBox('Deseja realmente excluir o registro?', 'Atenção!', MB_ICONWARNING + MB_YESNO) = mrYes then
   try
-    FrmCadastroFuncionario.ds_Cadastro.DataSet.Delete;
+    // Desabilita o ProviderFlags da coluna 'CAR_NOME' para exclusão
+    DS_CADASTRO.DataSet.FieldByName('CAR_NOME').ProviderFlags := [];
+
+    DS_CADASTRO.DataSet.Delete;
+
+    MessageBox(0, PChar('Registro excluído com sucesso!'), 'Sucesso', MB_ICONINFORMATION);
+
+    AtualizarDados;
   except
     on E: Exception do
-      MessageBox(0, PChar('Não é possível deletar Registro.'), 'Erro', MB_ICONERROR);
+      MessageBox(0, PChar('Erro ao excluir o registro: ' + E.Message), 'Erro', MB_ICONERROR);
   end;
 end;
 
 procedure TFrmConsultaFuncionario.btnNovoClick(Sender: TObject);
 begin
-   with TFrmCadastroFuncionario.Create(Self) do
   try
-    ds_Cadastro.DataSet.Open;
-    ds_Cadastro.DataSet.Insert;
-    ShowModal;
-  finally
-    Free;
+    with TFrmCadastroFuncionario.Create(Self) do
+    try
+      if not ds_Cadastro.DataSet.Active then
+        ds_Cadastro.DataSet.Open;
+
+      ds_Cadastro.DataSet := DS_CADASTRO.DataSet;
+      ds_Cadastro.DataSet.Insert;
+      ShowModal;
+    finally
+      Free;
+    end;
+
+    AtualizarDados;
+  except
+    on E: Exception do
+      MessageBox(0, PChar('Erro ao criar novo registro: ' + E.Message), 'Erro', MB_ICONERROR);
   end;
 end;
 
+
+
 procedure TFrmConsultaFuncionario.btnPesquisarClick(Sender: TObject);
 begin
-   if (DS_CADASTRO.State in [dsEdit, dsInsert]) then
+  if DS_CADASTRO.State in [dsEdit, dsInsert] then
   begin
     Application.MessageBox('Não é possível realizar consultas no modo de Inserção ou Edição!', 'Atenção!', MB_ICONEXCLAMATION);
     Exit;
@@ -108,22 +140,24 @@ begin
 
   try
     DS_CADASTRO.DataSet.Close;
-    FrmCadastroFuncionario.Q_CADASTRO.Params.Clear;
+
     FrmCadastroFuncionario.Q_CADASTRO.SQL.Clear;
-    FrmCadastroFuncionario.Q_CADASTRO.SQL.Add('SELECT * FROM FUNCIONARIOS');
+    FrmCadastroFuncionario.Q_CADASTRO.SQL.Add('SELECT F.NOME, F.ENDERECO, F.ADMISSAO, F.SALARIO, F.CARGO, C.CAR_NOME');
+    FrmCadastroFuncionario.Q_CADASTRO.SQL.Add('FROM FUNCIONARIOS F');
+    FrmCadastroFuncionario.Q_CADASTRO.SQL.Add('INNER JOIN CARGOS C ON F.CARGO = C.ID_CARGO');
 
     case CBCAMPOS.ItemIndex of
       0: // Nome
-        begin
-          FrmCadastroFuncionario.Q_CADASTRO.SQL.Add('WHERE nome LIKE :pnome');
-          FrmCadastroFuncionario.Q_CADASTRO.ParamByName('pnome').AsString := '%' + edt_pesquisa.Text + '%';
-        end;
+      begin
+        FrmCadastroFuncionario.Q_CADASTRO.SQL.Add('WHERE F.NOME LIKE :PNOME');
+        FrmCadastroFuncionario.Q_CADASTRO.ParamByName('PNOME').AsString := '%' + edt_pesquisa.Text + '%';
+      end;
 
       1: // Cargo
-        begin
-          FrmCadastroFuncionario.Q_CADASTRO.SQL.Add('WHERE cargo = :pcargo');
-          FrmCadastroFuncionario.Q_CADASTRO.ParamByName('pcargo').AsString := '%' + edt_pesquisa.Text + '%';
-        end;
+      begin
+        FrmCadastroFuncionario.Q_CADASTRO.SQL.Add('WHERE C.CAR_NOME LIKE :PCARGO');
+        FrmCadastroFuncionario.Q_CADASTRO.ParamByName('PCARGO').AsString := '%' + edt_pesquisa.Text + '%';
+      end;
     end;
 
     DS_CADASTRO.DataSet.Open;
@@ -133,13 +167,14 @@ begin
 
   except
     on E: Exception do
-      ShowMessage('Erro: '+ E.Message);
+      ShowMessage('Erro ao pesquisar: ' + E.Message);
   end;
 end;
 
 procedure TFrmConsultaFuncionario.FormShow(Sender: TObject);
 begin
-  DS_CADASTRO.DataSet.Open;
+  AtualizarDados;
 end;
 
 end.
+

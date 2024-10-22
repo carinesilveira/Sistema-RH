@@ -120,8 +120,9 @@ object FrmConsultaFuncionario: TFrmConsultaFuncionario
         end
         item
           Expanded = False
-          FieldName = 'CARGO'
-          Width = 101
+          FieldName = 'CAR_NOME'
+          Title.Caption = 'CARGO'
+          Width = 108
           Visible = True
         end
         item

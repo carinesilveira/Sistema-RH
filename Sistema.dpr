@@ -6,7 +6,8 @@ uses
   Vcl.Themes,
   Vcl.Styles,
   un_CadastroFuncionario in 'Cadastro\un_CadastroFuncionario.pas' {FrmCadastroFuncionario},
-  un_ConsultaFuncionario in 'Consulta\un_ConsultaFuncionario.pas' {FrmConsultaFuncionario};
+  un_ConsultaFuncionario in 'Consulta\un_ConsultaFuncionario.pas' {FrmConsultaFuncionario},
+  un_Resumo in 'un_Resumo.pas' {FrmResumo};
 
 {$R *.res}
 
@@ -17,5 +18,6 @@ begin
   Application.CreateForm(TFrmPrincipal, FrmPrincipal);
   Application.CreateForm(TFrmCadastroFuncionario, FrmCadastroFuncionario);
   Application.CreateForm(TFrmConsultaFuncionario, FrmConsultaFuncionario);
+  Application.CreateForm(TFrmResumo, FrmResumo);
   Application.Run;
 end.

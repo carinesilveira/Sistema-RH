@@ -24,7 +24,6 @@ type
     lblAdmissao: TLabel;
     admissao: TDateTimePicker;
     lblCargo: TLabel;
-    cbCargo: TDBComboBox;
     lblSalario: TLabel;
     edtSalario: TDBEdit;
     btnCancelar: TButton;
@@ -32,14 +31,17 @@ type
     Conexao: TFDConnection;
     Q_CADASTRO: TFDQuery;
     DS_CADASTRO: TDataSource;
-    Q_CADASTROID_FUNC: TFDAutoIncField;
+    Q_CARGO: TFDQuery;
+    DS_CARGO: TDataSource;
+    cbCargo: TDBLookupComboBox;
+    Q_CARGOID_CARGO: TFDAutoIncField;
+    Q_CARGOCAR_NOME: TStringField;
     Q_CADASTRONOME: TStringField;
     Q_CADASTROENDERECO: TStringField;
     Q_CADASTROADMISSAO: TSQLTimeStampField;
     Q_CADASTROSALARIO: TBCDField;
     Q_CADASTROCARGO: TIntegerField;
-    Q_CARGO: TFDQuery;
-    DS_CARGO: TDataSource;
+    Q_CADASTROCAR_NOME: TStringField;
     procedure btnSalvarClick(Sender: TObject);
     procedure btnCancelarClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -60,10 +62,6 @@ implementation
 
 procedure TFrmCadastroFuncionario.btnCancelarClick(Sender: TObject);
 begin
-  if Application.MessageBox('Deseja realmente sair?',
-  'Atenção!', MB_ICONWARNING + MB_YESNO) = mrNo then
-   Exit;
-
   ds_Cadastro.DataSet.Cancel;
   Close;
 end;
@@ -74,79 +72,69 @@ begin
 
   ds_Cadastro.DataSet.FieldByName('ADMISSAO').AsDateTime := ADMISSAO.Date;
 
+   if cbCargo.KeyValue <> Null then
+    ds_Cadastro.DataSet.FieldByName('CARGO').AsInteger := cbCargo.KeyValue;
+
   try
     ds_Cadastro.DataSet.Post;
-    Application.MessageBox('Registro salvo com sucesso!',
-   'Sucesso!', MB_ICONINFORMATION);
+    Application.MessageBox('Registro salvo com sucesso!', 'Sucesso!', MB_ICONINFORMATION);
   Except
     on E: Exception do
-      ShowMessage('Erro: '+E.Message)
+      ShowMessage('Erro: ' + E.Message);
   end;
 
   Close;
   ds_Cadastro.DataSet.Open();
 end;
 
-procedure TFrmCadastroFuncionario.FormClose(Sender: TObject;
-  var Action: TCloseAction);
+
+procedure TFrmCadastroFuncionario.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-if ds_Cadastro.DataSet.State in [dsInsert, dsEdit] then
-  ds_Cadastro.DataSet.Cancel;
+  if ds_Cadastro.DataSet.State in [dsInsert, dsEdit] then
+    ds_Cadastro.DataSet.Cancel;
 end;
 
 procedure TFrmCadastroFuncionario.FormShow(Sender: TObject);
 begin
   Q_CADASTRO.Open;
-  //q_cadastro.Insert;
   Q_CARGO.Open;
+  ds_Cadastro.DataSet := Q_CADASTRO;
+  admissao.Date := Now;
 end;
 
 procedure TFrmCadastroFuncionario.ValidaCampos;
 var
-  acao : string;
+  acao: string;
 begin
-  if (Trim(edtNome.Text) = '') then
+  if Trim(edtNome.Text) = '' then
   begin
-    Application.MessageBox('O campo NOME é obrigatório!',
-     'Atenção!', MB_ICONEXCLAMATION);
+    Application.MessageBox('O campo NOME é obrigatório!', 'Atenção!', MB_ICONEXCLAMATION);
     edtNome.SetFocus;
-    Exit;
+    Abort;
   end;
 
-  if (Trim(edtSalario.Text) = '') then
+  if Trim(edtSalario.Text) = '' then
   begin
-    Application.MessageBox('O campo SALÁRIO é obrigatório!',
-     'Atenção!', MB_ICONEXCLAMATION);
+    Application.MessageBox('O campo SALÁRIO é obrigatório!', 'Atenção!', MB_ICONEXCLAMATION);
     edtSalario.SetFocus;
-    Exit;
+    Abort;
   end;
 
-  if (Trim(edtSalario.Text) = '0,00') then
+  if StrToFloatDef(edtSalario.Text, 0) <= 0 then
   begin
-    Application.MessageBox('O campo SALÁRIO deve ser maior que 0!',
-     'Atenção!', MB_ICONEXCLAMATION);
+    Application.MessageBox('O campo SALÁRIO deve ser maior que 0!', 'Atenção!', MB_ICONEXCLAMATION);
     edtSalario.SetFocus;
-    Exit;
+    Abort;
   end;
 
-  if (cbCargo.ItemIndex = -1) then
-  begin
-    Application.MessageBox('O campo CARGO é obrigatório!',
-    'Atenção!', MB_ICONEXCLAMATION);
-    cbCargo.SetFocus;
-    Exit;
-  end;
-
-  if (ds_Cadastro.DataSet.State = dsEdit) then
+  if ds_Cadastro.DataSet.State = dsEdit then
     acao := 'alteração'
-  else if (ds_Cadastro.DataSet.State = dsInsert) then
+  else if ds_Cadastro.DataSet.State = dsInsert then
     acao := 'inserção';
 
-  if not (ds_Cadastro.DataSet.State in [dsEdit, dsInsert]) then
-    Exit
-  else if Application.MessageBox(pchar('Cofirma a '+ acao +' dos dados?'),
-   'Atenção', MB_ICONWARNING + MB_YESNO) = mrNo then
-    Exit;
+  if Application.MessageBox(PChar('Confirma a ' + acao + ' dos dados?'), 'Atenção!', MB_ICONWARNING + MB_YESNO) = mrNo then
+    Abort;
 end;
 
 end.
+

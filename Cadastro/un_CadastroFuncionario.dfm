@@ -140,25 +140,9 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
         Top = 38
         Width = 97
         Height = 23
-        Date = 45376.000000000000000000
+        Date = 45580.000000000000000000
         Time = 0.893172048614360400
         TabOrder = 0
-      end
-      object cbCargo: TDBComboBox
-        Left = 384
-        Top = 38
-        Width = 145
-        Height = 23
-        CharCase = ecUpperCase
-        DataField = 'CAR_NOME'
-        DataSource = DS_CARGO
-        Items.Strings = (
-          'DESENVOLVEDOR'
-          'QA'
-          'COMERCIAL'
-          'SUPORTE'
-          'MARKETING')
-        TabOrder = 1
       end
       object edtSalario: TDBEdit
         Left = 48
@@ -167,7 +151,7 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
         Height = 23
         DataField = 'SALARIO'
         DataSource = DS_CADASTRO
-        TabOrder = 2
+        TabOrder = 1
       end
       object btnCancelar: TButton
         Left = 536
@@ -175,7 +159,7 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
         Width = 75
         Height = 25
         Caption = 'Cancelar'
-        TabOrder = 3
+        TabOrder = 2
         OnClick = btnCancelarClick
       end
       object btnSalvar: TButton
@@ -184,8 +168,20 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
         Width = 75
         Height = 25
         Caption = 'Salvar'
-        TabOrder = 4
+        TabOrder = 3
         OnClick = btnSalvarClick
+      end
+      object cbCargo: TDBLookupComboBox
+        Left = 384
+        Top = 38
+        Width = 145
+        Height = 23
+        DataField = 'CARGO'
+        DataSource = DS_CADASTRO
+        KeyField = 'ID_CARGO'
+        ListField = 'CAR_NOME'
+        ListSource = DS_CARGO
+        TabOrder = 4
       end
     end
   end
@@ -203,15 +199,12 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
   object Q_CADASTRO: TFDQuery
     Connection = Conexao
     SQL.Strings = (
-      'SELECT * FROM FUNCIONARIOS')
-    Left = 297
-    Top = 384
-    object Q_CADASTROID_FUNC: TFDAutoIncField
-      FieldName = 'ID_FUNC'
-      Origin = 'ID_FUNC'
-      ProviderFlags = [pfInWhere, pfInKey]
-      ReadOnly = True
-    end
+      
+        'select NOME, ENDERECO, ADMISSAO, SALARIO, CARGO, C.CAR_NOME from' +
+        ' FUNCIONARIOS F'
+      'INNER JOIN CARGOS C ON C.ID_CARGO = F.CARGO')
+    Left = 201
+    Top = 256
     object Q_CADASTRONOME: TStringField
       FieldName = 'NOME'
       Origin = 'NOME'
@@ -239,22 +232,37 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
       FieldName = 'CARGO'
       Origin = 'CARGO'
     end
+    object Q_CADASTROCAR_NOME: TStringField
+      FieldName = 'CAR_NOME'
+      Origin = 'CAR_NOME'
+    end
   end
   object DS_CADASTRO: TDataSource
     DataSet = Q_CADASTRO
-    Left = 369
-    Top = 384
+    Left = 193
+    Top = 312
   end
   object Q_CARGO: TFDQuery
     Connection = Conexao
     SQL.Strings = (
-      'SELECT * FROM CARGOS')
-    Left = 440
-    Top = 40
+      'SELECT ID_CARGO, CAR_NOME FROM CARGOS')
+    Left = 320
+    Top = 256
+    object Q_CARGOID_CARGO: TFDAutoIncField
+      FieldName = 'ID_CARGO'
+      Origin = 'ID_CARGO'
+      ProviderFlags = [pfInWhere, pfInKey]
+      ReadOnly = True
+    end
+    object Q_CARGOCAR_NOME: TStringField
+      FieldName = 'CAR_NOME'
+      Origin = 'CAR_NOME'
+      Required = True
+    end
   end
   object DS_CARGO: TDataSource
     DataSet = Q_CARGO
-    Left = 504
-    Top = 40
+    Left = 320
+    Top = 320
   end
 end
