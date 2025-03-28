@@ -12,6 +12,7 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
   Font.Style = []
   Position = poMainFormCenter
   OnClose = FormClose
+  OnCreate = FormCreate
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 15
@@ -135,15 +136,6 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
         Font.Style = []
         ParentFont = False
       end
-      object admissao: TDateTimePicker
-        Left = 48
-        Top = 38
-        Width = 97
-        Height = 23
-        Date = 45580.000000000000000000
-        Time = 0.893172048614360400
-        TabOrder = 0
-      end
       object edtSalario: TDBEdit
         Left = 48
         Top = 129
@@ -151,7 +143,7 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
         Height = 23
         DataField = 'SALARIO'
         DataSource = DS_CADASTRO
-        TabOrder = 1
+        TabOrder = 0
       end
       object btnCancelar: TButton
         Left = 536
@@ -159,7 +151,7 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
         Width = 75
         Height = 25
         Caption = 'Cancelar'
-        TabOrder = 2
+        TabOrder = 1
         OnClick = btnCancelarClick
       end
       object btnSalvar: TButton
@@ -168,7 +160,7 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
         Width = 75
         Height = 25
         Caption = 'Salvar'
-        TabOrder = 3
+        TabOrder = 2
         OnClick = btnSalvarClick
       end
       object cbCargo: TDBLookupComboBox
@@ -181,6 +173,15 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
         KeyField = 'ID_CARGO'
         ListField = 'CAR_NOME'
         ListSource = DS_CARGO
+        TabOrder = 3
+      end
+      object admissao: TDateTimePicker
+        Left = 48
+        Top = 38
+        Width = 121
+        Height = 23
+        Date = 45733.000000000000000000
+        Time = 0.799901886573934500
         TabOrder = 4
       end
     end
@@ -189,7 +190,7 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
     Params.Strings = (
       'Database=RH'
       'User_Name=sa'
-      'Password=aram98'
+      'Password=123'
       'Server=localhost'
       'DriverID=MSSQL')
     Connected = True
@@ -200,8 +201,8 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
     Connection = Conexao
     SQL.Strings = (
       
-        'select NOME, ENDERECO, ADMISSAO, SALARIO, CARGO, C.CAR_NOME from' +
-        ' FUNCIONARIOS F'
+        'select ID_FUNC, NOME, ENDERECO, ADMISSAO, SALARIO, CARGO, C.CAR_' +
+        'NOME from FUNCIONARIOS F'
       'INNER JOIN CARGOS C ON C.ID_CARGO = F.CARGO')
     Left = 201
     Top = 256
@@ -236,6 +237,12 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
       FieldName = 'CAR_NOME'
       Origin = 'CAR_NOME'
     end
+    object Q_CADASTROID_FUNC: TFDAutoIncField
+      FieldName = 'ID_FUNC'
+      Origin = 'ID_FUNC'
+      ProviderFlags = [pfInWhere, pfInKey]
+      ReadOnly = True
+    end
   end
   object DS_CADASTRO: TDataSource
     DataSet = Q_CADASTRO
@@ -264,5 +271,10 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
     DataSet = Q_CARGO
     Left = 320
     Top = 320
+  end
+  object UpdateSQL: TFDUpdateSQL
+    Connection = Conexao
+    Left = 449
+    Top = 344
   end
 end

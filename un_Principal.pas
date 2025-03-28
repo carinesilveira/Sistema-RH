@@ -58,7 +58,6 @@ begin
   finally
     Free;
   end;
-
 end;
 
 procedure TFrmPrincipal.Resumo2Click(Sender: TObject);

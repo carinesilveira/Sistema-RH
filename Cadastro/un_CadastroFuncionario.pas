@@ -1,7 +1,6 @@
 unit un_CadastroFuncionario;
 
 interface
-
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.ComCtrls,
@@ -11,7 +10,6 @@ uses
   FireDAC.Phys.MSSQLDef, FireDAC.VCLUI.Wait, Data.DB, FireDAC.Comp.Client,
   FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt,
   FireDAC.Comp.DataSet;
-
 type
   TFrmCadastroFuncionario = class(TForm)
     pnlFundo: TPanel;
@@ -22,7 +20,6 @@ type
     edtNome: TDBEdit;
     pnlAdmissao: TPanel;
     lblAdmissao: TLabel;
-    admissao: TDateTimePicker;
     lblCargo: TLabel;
     lblSalario: TLabel;
     edtSalario: TDBEdit;
@@ -42,69 +39,101 @@ type
     Q_CADASTROSALARIO: TBCDField;
     Q_CADASTROCARGO: TIntegerField;
     Q_CADASTROCAR_NOME: TStringField;
+    admissao: TDateTimePicker;
+    UpdateSQL: TFDUpdateSQL;
+    Q_CADASTROID_FUNC: TFDAutoIncField;
     procedure btnSalvarClick(Sender: TObject);
     procedure btnCancelarClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormCreate(Sender: TObject);
   private
-    { Private declarations }
     procedure ValidaCampos;
+    procedure ConfigurarUpdateSQL;
   public
-    { Public declarations }
   end;
-
 var
   FrmCadastroFuncionario: TFrmCadastroFuncionario;
-
 implementation
-
 {$R *.dfm}
-
 procedure TFrmCadastroFuncionario.btnCancelarClick(Sender: TObject);
 begin
-  ds_Cadastro.DataSet.Cancel;
+  DS_CADASTRO.DataSet.Cancel;
   Close;
 end;
 
 procedure TFrmCadastroFuncionario.btnSalvarClick(Sender: TObject);
 begin
   ValidaCampos;
-
-  ds_Cadastro.DataSet.FieldByName('ADMISSAO').AsDateTime := ADMISSAO.Date;
-
-   if cbCargo.KeyValue <> Null then
-    ds_Cadastro.DataSet.FieldByName('CARGO').AsInteger := cbCargo.KeyValue;
-
+  DS_CADASTRO.DataSet.FieldByName('ADMISSAO').AsDateTime := admissao.Date;
+  if not VarIsNull(cbCargo.KeyValue) then
+    DS_CADASTRO.DataSet.FieldByName('CARGO').AsInteger := cbCargo.KeyValue;
   try
-    ds_Cadastro.DataSet.Post;
+    DS_CADASTRO.DataSet.Post;
     Application.MessageBox('Registro salvo com sucesso!', 'Sucesso!', MB_ICONINFORMATION);
-  Except
+  except
     on E: Exception do
-      ShowMessage('Erro: ' + E.Message);
+      Application.MessageBox(PChar('Erro ao salvar: ' + E.Message), 'Erro!', MB_ICONERROR);
   end;
-
   Close;
-  ds_Cadastro.DataSet.Open();
+  DS_CADASTRO.DataSet.Open;
 end;
 
-
-procedure TFrmCadastroFuncionario.FormClose(Sender: TObject; var Action: TCloseAction);
+procedure TFrmCadastroFuncionario.ConfigurarUpdateSQL;
 begin
-  if ds_Cadastro.DataSet.State in [dsInsert, dsEdit] then
-    ds_Cadastro.DataSet.Cancel;
+  with UpdateSQL do
+  begin
+    ModifySQL.Text :=
+      'UPDATE FUNCIONARIOS SET ' +
+      'NOME = :NOME, ' +
+      'ENDERECO = :ENDERECO, ' +
+      'ADMISSAO = :ADMISSAO, ' +
+      'SALARIO = :SALARIO, ' +
+      'CARGO = :CARGO ' +
+      'WHERE ID_FUNC = :OLD_ID_FUNC';
+
+    InsertSQL.Text :=
+      'INSERT INTO FUNCIONARIOS ' +
+      '(NOME, ENDERECO, ADMISSAO, SALARIO, CARGO) ' +
+      'VALUES ' +
+      '(:NOME, :ENDERECO, :ADMISSAO, :SALARIO, :CARGO)';
+
+    DeleteSQL.Text :=
+      'DELETE FROM FUNCIONARIOS ' +
+      'WHERE ID_FUNC = :OLD_ID_FUNC';
+  end;
+
+  Q_CADASTRO.UpdateObject := UpdateSQL;
 end;
 
 procedure TFrmCadastroFuncionario.FormShow(Sender: TObject);
 begin
   Q_CADASTRO.Open;
   Q_CARGO.Open;
-  ds_Cadastro.DataSet := Q_CADASTRO;
+  DS_CADASTRO.DataSet := Q_CADASTRO;
+
+  // Configurar o campo CAR_NOME como somente leitura
+  Q_CADASTROCAR_NOME.ProviderFlags := [];
+  Q_CADASTROCAR_NOME.ReadOnly := True;
+
+  // Configurar o UpdateSQL
+  ConfigurarUpdateSQL;
+
   admissao.Date := Now;
 end;
 
+procedure TFrmCadastroFuncionario.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  if DS_CADASTRO.DataSet.State in dsEditModes then
+    DS_CADASTRO.DataSet.Cancel;
+end;
+
+procedure TFrmCadastroFuncionario.FormCreate(Sender: TObject);
+begin
+  ConfigurarUpdateSQL;
+end;
+
 procedure TFrmCadastroFuncionario.ValidaCampos;
-var
-  acao: string;
 begin
   if Trim(edtNome.Text) = '' then
   begin
@@ -112,29 +141,23 @@ begin
     edtNome.SetFocus;
     Abort;
   end;
-
   if Trim(edtSalario.Text) = '' then
   begin
     Application.MessageBox('O campo SALÁRIO é obrigatório!', 'Atenção!', MB_ICONEXCLAMATION);
     edtSalario.SetFocus;
     Abort;
   end;
-
   if StrToFloatDef(edtSalario.Text, 0) <= 0 then
   begin
     Application.MessageBox('O campo SALÁRIO deve ser maior que 0!', 'Atenção!', MB_ICONEXCLAMATION);
     edtSalario.SetFocus;
     Abort;
   end;
-
-  if ds_Cadastro.DataSet.State = dsEdit then
-    acao := 'alteração'
-  else if ds_Cadastro.DataSet.State = dsInsert then
-    acao := 'inserção';
-
-  if Application.MessageBox(PChar('Confirma a ' + acao + ' dos dados?'), 'Atenção!', MB_ICONWARNING + MB_YESNO) = mrNo then
-    Abort;
+  if DS_CADASTRO.DataSet.State in dsEditModes then
+  begin
+    if Application.MessageBox('Confirma a operação?', 'Confirmação', MB_ICONWARNING or MB_YESNO) = IDNO then
+      Abort;
+  end;
 end;
-
 end.
 

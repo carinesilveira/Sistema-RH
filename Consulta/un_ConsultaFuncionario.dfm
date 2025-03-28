@@ -1,6 +1,7 @@
 object FrmConsultaFuncionario: TFrmConsultaFuncionario
   Left = 0
   Top = 0
+  BorderIcons = [biSystemMenu]
   ClientHeight = 441
   ClientWidth = 625
   Color = clBtnFace
