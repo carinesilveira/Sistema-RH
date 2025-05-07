@@ -22,7 +22,6 @@ type
     procedure Sair1Click(Sender: TObject);
     procedure mnFuncionarioclick(Sender: TObject);
     procedure Funcionrio2Click(Sender: TObject);
-    procedure FormShow(Sender: TObject);
     procedure Resumo2Click(Sender: TObject);
   private
     { Private declarations }
@@ -52,8 +51,8 @@ procedure TFrmPrincipal.mnFuncionarioclick(Sender: TObject);
 begin
  with TFrmCadastroFuncionario.Create(Self) do
   try
-    ds_Cadastro.DataSet.Open;
-    ds_Cadastro.DataSet.Insert;
+    Q_CADASTRO.Open; // Usa o componente da instância local
+    Q_CADASTRO.Insert;
     ShowModal;
   finally
     Free;
@@ -65,16 +64,11 @@ begin
   criarTelas(TFrmResumo);
 end;
 
-procedure TFrmPrincipal.FormShow(Sender: TObject);
-begin
-  FrmCadastroFuncionario.q_Cadastro.Open();
-end;
-
 procedure TFrmPrincipal.Funcionrio2Click(Sender: TObject);
 begin
-  FrmCadastroFuncionario.q_Cadastro.Open();
   criarTelas(TFrmConsultaFuncionario);
 end;
+
 
 procedure TFrmPrincipal.Sair1Click(Sender: TObject);
 begin

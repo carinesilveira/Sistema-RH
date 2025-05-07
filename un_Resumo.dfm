@@ -13,7 +13,6 @@ object FrmResumo: TFrmResumo
   Font.Name = 'Segoe UI'
   Font.Style = []
   Position = poMainFormCenter
-  WindowState = wsMaximized
   PixelsPerInch = 96
   TextHeight = 15
   object pnFundo: TPanel

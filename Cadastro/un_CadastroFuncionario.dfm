@@ -13,6 +13,7 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
   Position = poMainFormCenter
   OnClose = FormClose
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 15
@@ -67,7 +68,7 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
       Font.Style = []
       ParentBackground = False
       ParentFont = False
-      TabOrder = 0
+      TabOrder = 2
     end
     object edtEndereco: TDBEdit
       Left = 40
@@ -77,7 +78,7 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
       CharCase = ecUpperCase
       DataField = 'ENDERECO'
       DataSource = DS_CADASTRO
-      TabOrder = 2
+      TabOrder = 1
     end
     object edtNome: TDBEdit
       Left = 40
@@ -87,7 +88,7 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
       CharCase = ecUpperCase
       DataField = 'NOME'
       DataSource = DS_CADASTRO
-      TabOrder = 1
+      TabOrder = 0
     end
     object pnlAdmissao: TPanel
       Left = 1
@@ -143,7 +144,8 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
         Height = 23
         DataField = 'SALARIO'
         DataSource = DS_CADASTRO
-        TabOrder = 0
+        MaxLength = 10
+        TabOrder = 2
       end
       object btnCancelar: TButton
         Left = 536
@@ -151,7 +153,7 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
         Width = 75
         Height = 25
         Caption = 'Cancelar'
-        TabOrder = 1
+        TabOrder = 3
         OnClick = btnCancelarClick
       end
       object btnSalvar: TButton
@@ -160,7 +162,7 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
         Width = 75
         Height = 25
         Caption = 'Salvar'
-        TabOrder = 2
+        TabOrder = 4
         OnClick = btnSalvarClick
       end
       object cbCargo: TDBLookupComboBox
@@ -173,7 +175,7 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
         KeyField = 'ID_CARGO'
         ListField = 'CAR_NOME'
         ListSource = DS_CARGO
-        TabOrder = 3
+        TabOrder = 1
       end
       object admissao: TDateTimePicker
         Left = 48
@@ -182,7 +184,7 @@ object FrmCadastroFuncionario: TFrmCadastroFuncionario
         Height = 23
         Date = 45733.000000000000000000
         Time = 0.799901886573934500
-        TabOrder = 4
+        TabOrder = 0
       end
     end
   end

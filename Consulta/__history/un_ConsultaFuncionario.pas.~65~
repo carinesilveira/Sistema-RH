@@ -1,0 +1,110 @@
+unit un_ConsultaFuncionario;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Buttons, Vcl.Grids,
+  Vcl.DBGrids, Data.DB, FireDAC.Comp.Client, un_CadastroFuncionario,
+  Vcl.ExtCtrls;
+
+type
+  TFrmConsultaFuncionario = class(TForm)
+    Label1: TLabel;
+    edt_pesquisa: TEdit;
+    btnNovo: TButton;
+    btnExcluir: TButton;
+    DS_CADASTRO: TDataSource;
+    procedure FormShow(Sender: TObject);
+    procedure btnNovoClick(Sender: TObject);
+    procedure btnAlterarClick(Sender: TObject);
+    procedure btnExcluirClick(Sender: TObject);
+    procedure btnFecharClick(Sender: TObject);
+    procedure btn_pesquisarClick(Sender: TObject);
+  private
+    FrmCadastroFuncionario: TFrmCadastroFuncionario;
+  public
+  end;
+
+var
+  FrmConsultaFuncionario: TFrmConsultaFuncionario;
+
+implementation
+
+{$R *.dfm}
+
+procedure TFrmConsultaFuncionario.FormShow(Sender: TObject);
+begin
+  // Cria o form de cadastro se ainda não foi criado
+  if not Assigned(FrmCadastroFuncionario) then
+    FrmCadastroFuncionario := TFrmCadastroFuncionario.Create(Self);
+
+  // Abre a query e vincula ao grid
+  with FrmCadastroFuncionario.Q_CADASTRO do
+  begin
+    Close;
+    SQL.Clear;
+    SQL.Text :=
+      'SELECT F.ID_FUNC, F.NOME, F.ENDERECO, F.ADMISSAO, F.SALARIO, C.CAR_NOME ' +
+      'FROM FUNCIONARIOS F ' +
+      'INNER JOIN CARGOS C ON F.CARGO = C.ID_CARGO';
+    Open;
+  end;
+
+  DS_CADASTRO.DataSet := FrmCadastroFuncionario.Q_CADASTRO;
+end;
+
+procedure TFrmConsultaFuncionario.btnNovoClick(Sender: TObject);
+begin
+  if not Assigned(FrmCadastroFuncionario) then
+    FrmCadastroFuncionario := TFrmCadastroFuncionario.Create(Self);
+
+  FrmCadastroFuncionario.ShowModal;
+end;
+
+procedure TFrmConsultaFuncionario.btnAlterarClick(Sender: TObject);
+begin
+  if not Assigned(FrmCadastroFuncionario) then
+    FrmCadastroFuncionario := TFrmCadastroFuncionario.Create(Self);
+
+  FrmCadastroFuncionario.ShowModal;
+end;
+
+procedure TFrmConsultaFuncionario.btnExcluirClick(Sender: TObject);
+begin
+  if not Assigned(FrmCadastroFuncionario) then
+    Exit;
+
+  if not FrmCadastroFuncionario.Q_CADASTRO.IsEmpty then
+    FrmCadastroFuncionario.Q_CADASTRO.Delete;
+end;
+
+procedure TFrmConsultaFuncionario.btnFecharClick(Sender: TObject);
+begin
+  Close;
+end;
+
+procedure TFrmConsultaFuncionario.btn_pesquisarClick(Sender: TObject);
+var
+  pesquisa: string;
+begin
+  if not Assigned(FrmCadastroFuncionario) then
+    FrmCadastroFuncionario := TFrmCadastroFuncionario.Create(Self);
+
+  pesquisa := edt_pesquisa.Text;
+
+  with FrmCadastroFuncionario.Q_CADASTRO do
+  begin
+    Close;
+    SQL.Text :=
+      'SELECT F.ID_FUNC, F.NOME, F.ENDERECO, F.ADMISSAO, F.SALARIO, C.CAR_NOME ' +
+      'FROM FUNCIONARIOS F ' +
+      'INNER JOIN CARGOS C ON F.CARGO = C.ID_CARGO ' +
+      'WHERE F.NOME LIKE :PNOME';
+    ParamByName('PNOME').AsString := '%' + pesquisa + '%';
+    Open;
+  end;
+end;
+
+end.
+

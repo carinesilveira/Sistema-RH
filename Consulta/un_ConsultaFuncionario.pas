@@ -33,10 +33,15 @@ type
     procedure btnExcluirClick(Sender: TObject);
     procedure btnPesquisarClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   private
+    FCadastroForm: TFrmCadastroFuncionario;
+
+    function GetCadastroForm: TFrmCadastroFuncionario;
     function VerificarDadosParaConsulta: Boolean;
     procedure ExibirMensagem(const Msg: string; Tipo: Integer);
     procedure ConfigurarConsulta;
+    procedure AtualizarConsulta;
   public
     { Public declarations }
   end;
@@ -48,22 +53,49 @@ implementation
 
 {$R *.dfm}
 
+function TFrmConsultaFuncionario.GetCadastroForm: TFrmCadastroFuncionario;
+begin
+  if not Assigned(FCadastroForm) then
+    FCadastroForm := TFrmCadastroFuncionario.Create(Self);
+
+  Result := FCadastroForm;
+end;
+
 procedure TFrmConsultaFuncionario.FormCreate(Sender: TObject);
 begin
-  // Inicializar ComboBox
   CBCAMPOS.Items.Clear;
   CBCAMPOS.Items.Add('Nome');
   CBCAMPOS.Items.Add('Cargo');
   CBCAMPOS.ItemIndex := 0;
+
+  //Inicializar form de cadastro
+  FCadastroForm := nil;
+end;
+
+procedure TFrmConsultaFuncionario.FormDestroy(Sender: TObject);
+begin
+  // Liberar o formulário de cadastro se estiver alocado
+  if Assigned(FCadastroForm) then
+  begin
+    FCadastroForm.Free;
+    FCadastroForm := nil;
+  end;
 end;
 
 procedure TFrmConsultaFuncionario.ConfigurarConsulta;
 begin
-  if not Assigned(FrmCadastroFuncionario) then
-    FrmCadastroFuncionario := TFrmCadastroFuncionario.Create(Self);
+  GetCadastroForm;
 
-  DS_CADASTRO.DataSet := FrmCadastroFuncionario.Q_CADASTRO;
-  DS_CARGO.DataSet := FrmCadastroFuncionario.Q_CARGO;
+  DS_CADASTRO.DataSet := FCadastroForm.Q_CADASTRO;
+  DS_CARGO.DataSet := FCadastroForm.Q_CARGO;
+
+  if not FCadastroForm.Q_CARGO.Active then
+    FCadastroForm.Q_CARGO.Open;
+end;
+
+procedure TFrmConsultaFuncionario.AtualizarConsulta;
+begin
+  btnPesquisarClick(nil);
 end;
 
 function TFrmConsultaFuncionario.VerificarDadosParaConsulta: Boolean;
@@ -77,10 +109,13 @@ begin
     Exit;
   end;
 
-  if DS_CADASTRO.State in dsEditModes then
+  if DS_CADASTRO.DataSet <> nil then
   begin
-    ExibirMensagem('Não é possível realizar consultas no modo de Inserção ou Edição!', MB_ICONEXCLAMATION);
-    Exit;
+    if DS_CADASTRO.State in dsEditModes then
+    begin
+      ExibirMensagem('Não é possível realizar consultas no modo de Inserção ou Edição!', MB_ICONEXCLAMATION);
+      Exit;
+    end;
   end;
 
   Result := True;
@@ -95,43 +130,36 @@ procedure TFrmConsultaFuncionario.btnEditarClick(Sender: TObject);
 var
   IdFuncionario: Integer;
 begin
-  if DS_CADASTRO.DataSet.IsEmpty then
+  if (DS_CADASTRO.DataSet = nil) or DS_CADASTRO.DataSet.IsEmpty then
   begin
     ExibirMensagem('Nenhum registro para editar!', MB_ICONWARNING);
-    Abort;
+    Exit;
   end;
 
   try
     IdFuncionario := DS_CADASTRO.DataSet.FieldByName('ID_FUNC').AsInteger;
 
-    FrmCadastroFuncionario := TFrmCadastroFuncionario.Create(Self);
-    try
-      if not FrmCadastroFuncionario.Q_CADASTRO.Active then
-        FrmCadastroFuncionario.Q_CADASTRO.Open;
+    with GetCadastroForm do
+    begin
+      Q_CADASTRO.Close;
+      Q_CADASTRO.SQL.Clear;
+      Q_CADASTRO.SQL.Add('SELECT ID_FUNC,F.NOME, F.ENDERECO, F.ADMISSAO, F.SALARIO, F.CARGO, C.CAR_NOME');
+      Q_CADASTRO.SQL.Add('FROM FUNCIONARIOS F');
+      Q_CADASTRO.SQL.Add('INNER JOIN CARGOS C ON F.CARGO = C.ID_CARGO');
+      Q_CADASTRO.SQL.Add('WHERE F.ID_FUNC = :ID');
+      Q_CADASTRO.ParamByName('ID').AsInteger := IdFuncionario;
+      Q_CADASTRO.Open;
 
-      if not FrmCadastroFuncionario.Q_CARGO.Active then
-        FrmCadastroFuncionario.Q_CARGO.Open;
+      if not Q_CARGO.Active then
+        Q_CARGO.Open;
 
-      FrmCadastroFuncionario.Q_CADASTRO.Close;
-      FrmCadastroFuncionario.Q_CADASTRO.SQL.Clear;
-      FrmCadastroFuncionario.Q_CADASTRO.SQL.Add('SELECT ID_FUNC,F.NOME, F.ENDERECO, F.ADMISSAO, F.SALARIO, F.CARGO, C.CAR_NOME');
-      FrmCadastroFuncionario.Q_CADASTRO.SQL.Add('FROM FUNCIONARIOS F');
-      FrmCadastroFuncionario.Q_CADASTRO.SQL.Add('INNER JOIN CARGOS C ON F.CARGO = C.ID_CARGO');
-      FrmCadastroFuncionario.Q_CADASTRO.SQL.Add('WHERE F.ID_FUNC = :ID');
-      FrmCadastroFuncionario.Q_CADASTRO.ParamByName('ID').AsInteger := IdFuncionario;
-      FrmCadastroFuncionario.Q_CADASTRO.Open;
+      Q_CADASTRO.Edit;
 
-      FrmCadastroFuncionario.DS_CADASTRO.DataSet := FrmCadastroFuncionario.Q_CADASTRO;
-      FrmCadastroFuncionario.DS_CADASTRO.DataSet.Edit;
-
-      FrmCadastroFuncionario.ShowModal;
-
-      DS_CADASTRO.DataSet.Close;
-      DS_CADASTRO.DataSet.Open;
-
-    finally
-      FrmCadastroFuncionario.Free;
+      ShowModal;
     end;
+
+    AtualizarConsulta;
+
   except
     on E: Exception do
       ExibirMensagem('Erro ao editar registro: ' + E.Message, MB_ICONERROR);
@@ -143,7 +171,7 @@ var
   DeleteQuery: TFDQuery;
   IdFuncionario: Integer;
 begin
-  if DS_CADASTRO.DataSet.IsEmpty then
+  if (DS_CADASTRO.DataSet = nil) or DS_CADASTRO.DataSet.IsEmpty then
   begin
     ExibirMensagem('Não há registros para excluir!', MB_ICONWARNING);
     Exit;
@@ -153,32 +181,27 @@ begin
                            MB_ICONWARNING + MB_YESNO) = mrYes then
   begin
     try
-      if not Assigned(FrmCadastroFuncionario) then
-        ConfigurarConsulta;
+      IdFuncionario := DS_CADASTRO.DataSet.FieldByName('ID_FUNC').AsInteger;
 
-      IdFuncionario := DS_CADASTRO.DataSet.FieldByName('CARGO').AsInteger;
-
-      DS_CADASTRO.DataSet.FieldByName('CAR_NOME').ProviderFlags := [];
-
+      //Garantir instância do formulário de cadastro
       DeleteQuery := TFDQuery.Create(Self);
       try
-        DeleteQuery.Connection := FrmCadastroFuncionario.Conexao;
+        DeleteQuery.Connection := GetCadastroForm.Conexao;
 
-        FrmCadastroFuncionario.Conexao.StartTransaction;
+        GetCadastroForm.Conexao.StartTransaction;
         try
-          DeleteQuery.SQL.Text := 'DELETE FROM FUNCIONARIOS WHERE CARGO = :ID';
+          DeleteQuery.SQL.Text := 'DELETE FROM FUNCIONARIOS WHERE ID_FUNC = :ID';
           DeleteQuery.ParamByName('ID').AsInteger := IdFuncionario;
           DeleteQuery.ExecSQL;
 
-          FrmCadastroFuncionario.Conexao.Commit;
+          GetCadastroForm.Conexao.Commit;
           ExibirMensagem('Registro excluído com sucesso!', MB_ICONINFORMATION);
 
-          DS_CADASTRO.DataSet.Close;
-          DS_CADASTRO.DataSet.Open;
+          AtualizarConsulta;
         except
           on E: Exception do
           begin
-            FrmCadastroFuncionario.Conexao.Rollback;
+            GetCadastroForm.Conexao.Rollback;
             raise;
           end;
         end;
@@ -195,32 +218,27 @@ end;
 procedure TFrmConsultaFuncionario.btnNovoClick(Sender: TObject);
 begin
   try
-    FrmCadastroFuncionario := TFrmCadastroFuncionario.Create(Self);
-    try
-      if not FrmCadastroFuncionario.Q_CADASTRO.Active then
-        FrmCadastroFuncionario.Q_CADASTRO.Open;
+    with GetCadastroForm do
+    begin
+      Q_CADASTRO.Close;
+      Q_CADASTRO.SQL.Clear;
+      Q_CADASTRO.SQL.Add('SELECT ID_FUNC,F.NOME, F.ENDERECO, F.ADMISSAO, F.SALARIO, F.CARGO, C.CAR_NOME');
+      Q_CADASTRO.SQL.Add('FROM FUNCIONARIOS F');
+      Q_CADASTRO.SQL.Add('INNER JOIN CARGOS C ON F.CARGO = C.ID_CARGO');
+      Q_CADASTRO.SQL.Add('WHERE 1=0');
+      Q_CADASTRO.Open;
 
-      if not FrmCadastroFuncionario.Q_CARGO.Active then
-        FrmCadastroFuncionario.Q_CARGO.Open;
+      // Garantir que a query de cargos esteja aberta
+      if not Q_CARGO.Active then
+        Q_CARGO.Open;
 
-      FrmCadastroFuncionario.Q_CADASTRO.Close;
-      FrmCadastroFuncionario.Q_CADASTRO.SQL.Clear;
-      FrmCadastroFuncionario.Q_CADASTRO.SQL.Add('SELECT ID_FUNC,F.NOME, F.ENDERECO, F.ADMISSAO, F.SALARIO, F.CARGO, C.CAR_NOME');
-      FrmCadastroFuncionario.Q_CADASTRO.SQL.Add('FROM FUNCIONARIOS F');
-      FrmCadastroFuncionario.Q_CADASTRO.SQL.Add('INNER JOIN CARGOS C ON F.CARGO = C.ID_CARGO');
-      FrmCadastroFuncionario.Q_CADASTRO.SQL.Add('WHERE 1=0');
-      FrmCadastroFuncionario.Q_CADASTRO.Open;
+      Q_CADASTRO.Insert;
 
-      FrmCadastroFuncionario.DS_CADASTRO.DataSet := FrmCadastroFuncionario.Q_CADASTRO;
-      FrmCadastroFuncionario.DS_CADASTRO.DataSet.Insert;
-
-      FrmCadastroFuncionario.ShowModal;
-
-      DS_CADASTRO.DataSet.Close;
-      DS_CADASTRO.DataSet.Open;
-    finally
-      FrmCadastroFuncionario.Free;
+      ShowModal;
     end;
+
+    AtualizarConsulta;
+
   except
     on E: Exception do
       ExibirMensagem('Erro ao criar novo registro: ' + E.Message, MB_ICONERROR);
@@ -235,35 +253,32 @@ begin
   try
     ConfigurarConsulta;
 
-    with FrmCadastroFuncionario.Q_CADASTRO do
+    with GetCadastroForm do
     begin
-      Close;
-      SQL.Clear;
-      SQL.Add('SELECT ID_FUNC, F.NOME, F.ENDERECO, F.ADMISSAO, F.SALARIO, F.CARGO, C.CAR_NOME');
-      SQL.Add('FROM FUNCIONARIOS F');
-      SQL.Add('INNER JOIN CARGOS C ON F.CARGO = C.ID_CARGO');
+      Q_CADASTRO.Close;
+      Q_CADASTRO.SQL.Clear;
+      Q_CADASTRO.SQL.Add('SELECT ID_FUNC, F.NOME, F.ENDERECO, F.ADMISSAO, F.SALARIO, F.CARGO, C.CAR_NOME');
+      Q_CADASTRO.SQL.Add('FROM FUNCIONARIOS F');
+      Q_CADASTRO.SQL.Add('INNER JOIN CARGOS C ON F.CARGO = C.ID_CARGO');
 
       case CBCAMPOS.ItemIndex of
         0: // Nome
         begin
-          SQL.Add('WHERE F.NOME LIKE :PNOME');
-          ParamByName('PNOME').AsString := '%' + edt_pesquisa.Text + '%';
+          Q_CADASTRO.SQL.Add('WHERE UPPER(F.NOME) LIKE :PNOME');
+          Q_CADASTRO.ParamByName('PNOME').AsString := '%' + UpperCase(edt_pesquisa.Text) + '%';
         end;
 
         1: // Cargo
         begin
-          SQL.Add('WHERE C.CAR_NOME LIKE :PCARGO');
-          ParamByName('PCARGO').AsString := '%' + edt_pesquisa.Text + '%';
-        end;
-        else
-        begin
-          SQL.Add('WHERE 1=1');
+          Q_CADASTRO.SQL.Add('WHERE UPPER(C.CAR_NOME) LIKE :PCARGO');
+          Q_CADASTRO.ParamByName('PCARGO').AsString := '%' + UpperCase(edt_pesquisa.Text) + '%';
         end;
       end;
-      Open;
+
+      Q_CADASTRO.Open;
     end;
 
-    if FrmCadastroFuncionario.Q_CADASTRO.IsEmpty then
+    if FCadastroForm.Q_CADASTRO.IsEmpty then
       ExibirMensagem('Nenhum registro encontrado!', MB_ICONEXCLAMATION);
 
   except
@@ -274,8 +289,7 @@ end;
 
 procedure TFrmConsultaFuncionario.FormShow(Sender: TObject);
 begin
-  DS_CADASTRO.DataSet.Close;
-  DS_CADASTRO.DataSet.Open;
+  ConfigurarConsulta;
 end;
 
 end.
